@@ -1,0 +1,16 @@
+/home/novosel2/development/aspnetcore/treblle-api/Application/bin/Debug/net9.0/Application.deps.json
+/home/novosel2/development/aspnetcore/treblle-api/Application/bin/Debug/net9.0/Application.dll
+/home/novosel2/development/aspnetcore/treblle-api/Application/bin/Debug/net9.0/Application.pdb
+/home/novosel2/development/aspnetcore/treblle-api/Application/obj/Debug/net9.0/Application.csproj.AssemblyReference.cache
+/home/novosel2/development/aspnetcore/treblle-api/Application/obj/Debug/net9.0/Application.GeneratedMSBuildEditorConfig.editorconfig
+/home/novosel2/development/aspnetcore/treblle-api/Application/obj/Debug/net9.0/Application.AssemblyInfoInputs.cache
+/home/novosel2/development/aspnetcore/treblle-api/Application/obj/Debug/net9.0/Application.AssemblyInfo.cs
+/home/novosel2/development/aspnetcore/treblle-api/Application/obj/Debug/net9.0/Application.csproj.CoreCompileInputs.cache
+/home/novosel2/development/aspnetcore/treblle-api/Application/obj/Debug/net9.0/Application.sourcelink.json
+/home/novosel2/development/aspnetcore/treblle-api/Application/obj/Debug/net9.0/Application.dll
+/home/novosel2/development/aspnetcore/treblle-api/Application/obj/Debug/net9.0/refint/Application.dll
+/home/novosel2/development/aspnetcore/treblle-api/Application/obj/Debug/net9.0/Application.pdb
+/home/novosel2/development/aspnetcore/treblle-api/Application/obj/Debug/net9.0/ref/Application.dll
+/home/novosel2/development/aspnetcore/treblle-api/Application/bin/Debug/net9.0/Domain.dll
+/home/novosel2/development/aspnetcore/treblle-api/Application/bin/Debug/net9.0/Domain.pdb
+/home/novosel2/development/aspnetcore/treblle-api/Application/obj/Debug/net9.0/Applicat.44B5EDA2.Up2Date

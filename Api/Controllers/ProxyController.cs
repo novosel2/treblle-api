@@ -1,4 +1,6 @@
+using Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace Api.Controllers;
 
@@ -6,17 +8,35 @@ namespace Api.Controllers;
 [Route("api/proxy")]
 public class ProxyController : ControllerBase
 {
-    public ProxyController()
-    {
+    private readonly IProxyService _proxyService;
 
+    public ProxyController(IProxyService proxyService)
+    {
+        _proxyService = proxyService;
     }
 
 
-    // GET: {anyPath}?{anyQuery}
+    // {ANY METHOD}: {anyPath}?{anyQuery}
 
     [HttpGet("{**path}"), HttpPost("{**path}"), HttpDelete("{**path}"), HttpPut("{**path}"), HttpPatch("{**path}")]
-    public IActionResult Forward(string? path)
+    public async Task<IActionResult> Forward(string path, [FromBody] JsonElement? raw)
     {
-        return Ok(path ?? "No path");
+        string? body = raw.HasValue &&
+              raw.Value.ValueKind != JsonValueKind.Null &&
+              raw.Value.ValueKind != JsonValueKind.Undefined
+        ? raw.Value.GetRawText()
+        : null;
+
+        var response = await _proxyService.ForwardAsync(Request, path, body);
+
+        var content = await response.Content.ReadAsStringAsync();
+        var contentType = response.Content.Headers.ContentType?.ToString() ?? "application/json";
+
+        return new ContentResult
+        {
+            StatusCode = (int)response.StatusCode,
+            Content = content,
+            ContentType = contentType
+        };
     }
 }

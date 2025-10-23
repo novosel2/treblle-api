@@ -1,0 +1,12 @@
+/home/novosel2/development/aspnetcore/treblle-api/Domain/bin/Debug/net9.0/Domain.deps.json
+/home/novosel2/development/aspnetcore/treblle-api/Domain/bin/Debug/net9.0/Domain.dll
+/home/novosel2/development/aspnetcore/treblle-api/Domain/bin/Debug/net9.0/Domain.pdb
+/home/novosel2/development/aspnetcore/treblle-api/Domain/obj/Debug/net9.0/Domain.GeneratedMSBuildEditorConfig.editorconfig
+/home/novosel2/development/aspnetcore/treblle-api/Domain/obj/Debug/net9.0/Domain.AssemblyInfoInputs.cache
+/home/novosel2/development/aspnetcore/treblle-api/Domain/obj/Debug/net9.0/Domain.AssemblyInfo.cs
+/home/novosel2/development/aspnetcore/treblle-api/Domain/obj/Debug/net9.0/Domain.csproj.CoreCompileInputs.cache
+/home/novosel2/development/aspnetcore/treblle-api/Domain/obj/Debug/net9.0/Domain.sourcelink.json
+/home/novosel2/development/aspnetcore/treblle-api/Domain/obj/Debug/net9.0/Domain.dll
+/home/novosel2/development/aspnetcore/treblle-api/Domain/obj/Debug/net9.0/refint/Domain.dll
+/home/novosel2/development/aspnetcore/treblle-api/Domain/obj/Debug/net9.0/Domain.pdb
+/home/novosel2/development/aspnetcore/treblle-api/Domain/obj/Debug/net9.0/ref/Domain.dll

@@ -12,9 +12,6 @@ public class Log
     public string Method { get; set; } = null!;
 
     [Required]
-    public string Response { get; set; } = null!;
-
-    [Required]
     public int StatusCode { get; set; }
 
     [Required]
