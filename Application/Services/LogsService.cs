@@ -58,7 +58,6 @@ public class LogsService : ILogsService
 
         log = await _logsRepository.AddLogAsync(log, ct);
 
-
         await CheckForProblemsAsync(log, ct);
 
         if (!await _logsRepository.IsSavedAsync(ct))

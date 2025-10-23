@@ -41,22 +41,11 @@ public class ProxyService : IProxyService
             req.Content = new StringContent(body, Encoding.UTF8, "application/json");
 
         if (incomingRequest.Headers.TryGetValue("Authorization", out var authVals))
-        {
-            // Prefer robust parse; falls back to raw add if needed
-            if (AuthenticationHeaderValue.TryParse(authVals.ToString(), out var auth))
-            {
-                req.Headers.Authorization = auth;
-            }
-            else
-            {
-                // If someone sent a non-standard value, still forward it
-                req.Headers.TryAddWithoutValidation("Authorization", authVals.ToArray());
-            }
-        }
+            req.Headers.TryAddWithoutValidation("Authorization", authVals.ToArray());
 
-        Stopwatch sw = Stopwatch.StartNew();
         HttpResponseMessage response = new HttpResponseMessage();
 
+        Stopwatch sw = Stopwatch.StartNew();
         try
         {
             response = await _apiClient.SendRequestAsync(req, ct);

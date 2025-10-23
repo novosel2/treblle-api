@@ -34,9 +34,8 @@ public class LogsController : ControllerBase
             [FromQuery(Name = "responseTime[lte]")] double? responseLte = null, // 100, 200, 300 (ms)
             [FromQuery(Name = "createdAt[gte]")] DateTimeOffset? createdFrom = null, // 2025-11-06T11:30:00
             [FromQuery(Name = "createdAt[lte]")] DateTimeOffset? createdTo = null, // 2025-12-01T12:30:00
-            [FromQuery(Name = "q")] string? search = null,
-            CancellationToken ct = default
-            )
+            [FromQuery] string? search = null,
+            CancellationToken ct = default)
     {
         if (page < 0)
             return BadRequest(new ProblemDetails { Title = "Invalid pagination", Detail = "Page cannot be less than 0", Status = 400 });
@@ -76,8 +75,7 @@ public class LogsController : ControllerBase
             [FromQuery(Name = "responseTime[lte]")] double? responseLte = null, // 100, 200, 300 (ms)
             [FromQuery(Name = "createdAt[gte]")] DateTimeOffset? createdFrom = null, // 2025-11-06
             [FromQuery(Name = "createdAt[lte]")] DateTimeOffset? createdTo = null, // 2025-12-01
-            CancellationToken ct = default
-            )
+            CancellationToken ct = default)
     {
         if (page < 0)
             return BadRequest(new ProblemDetails { Title = "Invalid pagination", Detail = "Page cannot be less than 0", Status = 400 });
