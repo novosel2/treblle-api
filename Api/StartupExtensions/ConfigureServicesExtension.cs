@@ -1,6 +1,7 @@
 using Application.Interfaces.IServices;
 using Application.Interfaces.IClients;
 using Infrastructure.Clients;
+using Infrastructure.HostedServices;
 using Application.Services;
 using Microsoft.OpenApi.Models;
 using Infrastructure.Data;
@@ -65,6 +66,8 @@ public static class ConfigureServicesExtension
         services.AddScoped<IProxyService, ProxyService>();
         services.AddScoped<ILogsService, LogsService>();
         services.AddScoped<ILogsRepository, LogsRepository>();
+
+        services.AddHostedService<MigrationHostedService>();
 
         return services;
     }
