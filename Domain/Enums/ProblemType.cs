@@ -7,5 +7,4 @@ public enum ProblemType
     Timeout,
     ServiceUnavailable,
     RateLimitExceeded
-
 }

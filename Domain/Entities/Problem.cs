@@ -12,10 +12,7 @@ public class Problem
     public ProblemType Type { get; set; }
 
     [Required]
-    public ProblemStatus Status { get; set; }
-
-    [Required]
-    public MethodsEnum Method { get; set; }
+    public string Method { get; set; } = null!;
 
     [Required]
     public string Path { get; set; } = null!;
@@ -34,7 +31,4 @@ public class Problem
 
     [Required]
     public DateTime LastSeen { get; set; }
-
-    [Required]
-    public DateTime? ResolvedAt { get; set; }
 }

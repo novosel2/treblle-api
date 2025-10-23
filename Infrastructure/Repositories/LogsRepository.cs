@@ -74,6 +74,82 @@ public class LogsRepository : ILogsRepository
     }
 
 
+    public async Task<List<Problem>> GetProblemsAsync(int page, int limit, SortByEnum sortBy, SortDirEnum sortDir,
+            MethodsEnum[]? methods, int[]? statusCodes, double? responseLessThan, double? responseMoreThan,
+            DateTime? createdFrom, DateTime? createdTo)
+    {
+        var query = _db.Problems.AsQueryable();
+
+        // Filter by methods
+        if (methods != null)
+            query = query.Where(p => methods.Select(m => m.ToString()).Contains(p.Method));
+
+        // Filter by status codes
+        if (statusCodes != null)
+            query = query.Where(p => statusCodes.Contains(p.StatusCode));
+
+        // Filter by response time
+        if (responseLessThan != null)
+            query = query.Where(p => p.LastResponseTime <= responseLessThan);
+        if (responseMoreThan != null)
+            query = query.Where(p => p.LastResponseTime >= responseMoreThan);
+
+        // Filter by date
+        if (createdFrom != null)
+            query = query.Where(p => p.CreatedAt >= createdFrom);
+        if (createdTo != null)
+            query = query.Where(p => p.CreatedAt <= createdTo);
+
+        // Sort by and sort direction
+        (string by, bool desc) = (sortBy.ToString().ToLower(), sortDir.ToString().ToLower() == "desc");
+        query = (by, desc) switch
+        {
+            ("responsetime", false) => query.OrderBy(r => r.LastResponseTime),
+            ("responsetime", true) => query.OrderByDescending(r => r.LastResponseTime),
+            ("statuscode", false) => query.OrderBy(r => r.StatusCode).ThenByDescending(r => r.CreatedAt),
+            ("statuscode", true) => query.OrderByDescending(r => r.StatusCode).ThenByDescending(r => r.CreatedAt),
+            ("createdat", false) => query.OrderBy(r => r.CreatedAt),
+            _ => query.OrderByDescending(r => r.CreatedAt) // default
+        };
+
+        var logs = await query
+            .Skip(page * limit)
+            .Take(limit)
+            .ToListAsync();
+
+        return logs;
+    }
+
+
+    public async Task<Problem?> GetExistingProblemAsync(ProblemType type, string path, string method)
+    {
+        var now = DateTime.UtcNow;
+        Problem? problem = await _db.Problems.FirstOrDefaultAsync(
+                p => p.Type.ToString() == type.ToString()
+                && p.Path == path
+                && p.Method == method
+                && (now - p.LastSeen) < TimeSpan.FromMinutes(20));
+
+        return problem;
+    }
+
+
+    public async Task AddProblemAsync(Problem problem)
+    {
+        await _db.Problems.AddAsync(problem);
+    }
+
+
+    public void UpdateProblem(Problem problem, Log log)
+    {
+        problem.Occurrences++;
+        problem.StatusCode = log.StatusCode;
+        problem.LastResponseTime = log.ResponseTime;
+        problem.LastSeen = DateTime.UtcNow;
+        _db.Problems.Entry(problem).State = EntityState.Modified;
+    }
+
+
     public async Task<bool> IsSavedAsync()
     {
         int saved = await _db.SaveChangesAsync();

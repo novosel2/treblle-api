@@ -9,6 +9,7 @@ using Infrastructure.Repositories;
 using Application.Interfaces.IRepositories;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using Api.Filters.ExceptionFilters;
 
 namespace Api.StartupExtensions;
 
@@ -16,7 +17,10 @@ public static class ConfigureServicesExtension
 {
     public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration config)
     {
-        services.AddControllers()
+        services.AddControllers(options =>
+        {
+            options.Filters.Add(typeof(ExceptionFilter));
+        })
         .AddJsonOptions(options =>
         {
             // use names instead of 0/1/2 in JSON

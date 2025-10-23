@@ -5,7 +5,6 @@ using Application.Exceptions;
 using Application.Interfaces.IClients;
 using Application.Interfaces.IRepositories;
 using Application.Interfaces.IServices;
-using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
@@ -16,13 +15,16 @@ public class ProxyService : IProxyService
     private readonly string _baseUrl;
     private readonly IApiClient _apiClient;
     private readonly ILogsRepository _logsRepository;
+    private readonly ILogsService _logsService;
 
-    public ProxyService(IConfiguration config, IApiClient apiClient, ILogsRepository logsRepository)
+    public ProxyService(IConfiguration config, IApiClient apiClient,
+            ILogsRepository logsRepository, ILogsService logsService)
     {
         _baseUrl = config["BaseApiUrl"] ??
             throw new UndefinedBaseUrlException("Base api url undefined in configuration");
         _apiClient = apiClient;
         _logsRepository = logsRepository;
+        _logsService = logsService;
     }
 
     public async Task<HttpResponseMessage> ForwardAsync(HttpRequest incomingRequest, string targetPath, string? body)
@@ -52,22 +54,21 @@ public class ProxyService : IProxyService
         }
 
         Stopwatch sw = Stopwatch.StartNew();
-        var httpResponse = await _apiClient.SendRequestAsync(req);
-        sw.Stop();
-
-        var log = new Log()
+        try
         {
-            Method = req.Method.Method,
-            Path = req.RequestUri?.ToString() ?? "undefined path",
-            ResponseTime = sw.ElapsedMilliseconds,
-            StatusCode = (int)httpResponse.StatusCode
-        };
+            var httpResponse = await _apiClient.SendRequestAsync(req);
+            sw.Stop();
 
-        log = await _logsRepository.AddLogAsync(log);
+            var log = await _logsService.AddLogAsync(req, httpResponse, sw);
 
-        if (!await _logsRepository.IsSavedAsync())
-            throw new SavingChangesFailedException("Failed while adding the log to database");
+            return httpResponse;
+        }
+        catch (TimeoutException ex)
+        {
+            await _logsService.AddLogAsync(req, new HttpResponseMessage() { StatusCode = 0 }, sw);
 
-        return httpResponse;
+            throw ex;
+        }
     }
+
 }
