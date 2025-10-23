@@ -7,5 +7,5 @@ public interface IApiClient
     /// </summary>
     /// <param name="req">HTTP Request Message</param>
     /// <returns>The actual HTTP Response from the original API</returns>
-    Task<HttpResponseMessage> SendRequestAsync(HttpRequestMessage req);
+    Task<HttpResponseMessage> SendRequestAsync(HttpRequestMessage req, CancellationToken ct);
 }

@@ -27,7 +27,7 @@ public class LogsRepository : ILogsRepository
             MethodsEnum[]? methods, int[]? statusCodes, double? responseLte, double? responseGte,
             DateTimeOffset? createdFrom, DateTimeOffset? createdTo, string? search, CancellationToken ct)
     {
-        var query = _db.Logs.AsQueryable();
+        var query = _db.Logs.AsNoTracking();
 
         // Filter by methods
         if (methods != null)
@@ -80,7 +80,7 @@ public class LogsRepository : ILogsRepository
             MethodsEnum[]? methods, int[]? statusCodes, double? responseLte, double? responseGte,
             DateTimeOffset? createdFrom, DateTimeOffset? createdTo, CancellationToken ct)
     {
-        var query = _db.Problems.AsQueryable();
+        var query = _db.Problems.AsNoTracking();
 
         // Filter by methods
         if (methods != null)

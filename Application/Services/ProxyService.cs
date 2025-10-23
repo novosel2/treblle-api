@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using Application.Exceptions;
@@ -54,21 +55,29 @@ public class ProxyService : IProxyService
         }
 
         Stopwatch sw = Stopwatch.StartNew();
+        HttpResponseMessage response = new HttpResponseMessage();
+
         try
         {
-            var httpResponse = await _apiClient.SendRequestAsync(req);
-            sw.Stop();
-
-            var log = await _logsService.AddLogAsync(req, httpResponse, sw, ct);
-
-            return httpResponse;
+            response = await _apiClient.SendRequestAsync(req, ct);
         }
-        catch
+        catch (TaskCanceledException)
         {
-            await _logsService.AddLogAsync(req, new HttpResponseMessage() { StatusCode = 0 }, sw, ct);
-
-            throw;
+            // Timeout
+            response = new HttpResponseMessage(HttpStatusCode.GatewayTimeout);
         }
+        catch (Exception)
+        {
+            // Connection error or something unexpected
+            response = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+        }
+        finally
+        {
+            sw.Stop();
+            await _logsService.AddLogAsync(req, response, sw, ct);
+        }
+
+        return response;
     }
 
 }

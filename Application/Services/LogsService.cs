@@ -6,6 +6,7 @@ using System.Diagnostics;
 using Application.Exceptions;
 using Application.Common;
 using Application.Common.Dto;
+using System.Net;
 
 namespace Application.Services;
 
@@ -69,19 +70,19 @@ public class LogsService : ILogsService
 
     private async Task CheckForProblemsAsync(Log log, CancellationToken ct)
     {
-        if (log.ResponseTime >= 300)
+        if (log.ResponseTime >= 300) // low response time for testing
             await CreateProblemAsync(ProblemType.HighResponseTime, log, ct);
 
         if (log.StatusCode >= 500 && log.StatusCode <= 600)
             await CreateProblemAsync(ProblemType.ServerError, log, ct);
 
-        if (log.StatusCode == 0)
+        if (log.StatusCode == (int)HttpStatusCode.GatewayTimeout)
             await CreateProblemAsync(ProblemType.Timeout, log, ct);
 
         if (log.StatusCode == 429)
             await CreateProblemAsync(ProblemType.RateLimitExceeded, log, ct);
 
-        if (log.StatusCode == 503)
+        if (log.StatusCode == (int)HttpStatusCode.ServiceUnavailable)
             await CreateProblemAsync(ProblemType.ServiceUnavailable, log, ct);
     }
 

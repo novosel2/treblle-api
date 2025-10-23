@@ -4,7 +4,7 @@ namespace Infrastructure.Clients;
 
 public class ApiClient : IApiClient
 {
-    public async Task<HttpResponseMessage> SendRequestAsync(HttpRequestMessage req)
+    public async Task<HttpResponseMessage> SendRequestAsync(HttpRequestMessage req, CancellationToken ct)
     {
         using (var client = new HttpClient())
         {
