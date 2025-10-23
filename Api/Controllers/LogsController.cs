@@ -29,11 +29,12 @@ public class LogsController : ControllerBase
             [FromQuery] double? responseLessThan = null, // 100, 200, 300 (ms)
             [FromQuery] double? responseMoreThan = null, // 100, 200, 300 (ms)
             [FromQuery] DateTime? createdFrom = null, // 2025-11-06
-            [FromQuery] DateTime? createdTo = null // 2025-12-01
+            [FromQuery] DateTime? createdTo = null, // 2025-12-01
+            [FromQuery] string? search = null
             )
     {
         var logs = await _logsService.GetLogsAsync(page, limit, sortBy, sortDir, method, statusCode,
-                responseLessThan, responseMoreThan, createdFrom, createdTo);
+                responseLessThan, responseMoreThan, createdFrom, createdTo, search);
         return Ok(logs);
     }
 }

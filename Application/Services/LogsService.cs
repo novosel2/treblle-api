@@ -1,4 +1,4 @@
-using Application.Enums;
+using Domain.Enums;
 using Application.Interfaces.IRepositories;
 using Application.Interfaces.IServices;
 using Domain.Entities;
@@ -17,10 +17,10 @@ public class LogsService : ILogsService
 
     public async Task<List<Log>> GetLogsAsync(int page, int limit, SortByEnum sortBy, SortDirEnum sortDir,
             MethodsEnum[]? methods, int[]? statusCodes, double? responseLessThan, double? responseMoreThan,
-            DateTime? createdFrom, DateTime? createdTo)
+            DateTime? createdFrom, DateTime? createdTo, string? search)
     {
         var logs = await _logsRepository.GetLogsAsync(page, limit, sortBy, sortDir, methods,
-                statusCodes, responseLessThan, responseMoreThan, createdFrom, createdTo);
+                statusCodes, responseLessThan, responseMoreThan, createdFrom, createdTo, search);
         return logs;
     }
 }

@@ -1,4 +1,4 @@
-using Application.Enums;
+using Domain.Enums;
 using Domain.Entities;
 
 namespace Application.Interfaces.IServices;
@@ -18,8 +18,9 @@ public interface ILogsService
     /// <param name="responseMoreThan">Filter logs with response time more than this number</param>
     /// <param name="createdFrom">Filter logs with date after this date</param>
     /// <param name="createdTo">Filter logs with date before this date</param>
+    /// <param name="search">Search query</param>
     /// <returns>List of logs</returns>
     Task<List<Log>> GetLogsAsync(int page, int limit, SortByEnum sortBy, SortDirEnum sortDir,
             MethodsEnum[]? methods, int[]? statusCodes, double? responseLessThan, double? responseMoreThan,
-            DateTime? createdFrom, DateTime? createdTo);
+            DateTime? createdFrom, DateTime? createdTo, string? search);
 }

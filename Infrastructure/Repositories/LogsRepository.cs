@@ -1,4 +1,4 @@
-using Application.Enums;
+using Domain.Enums;
 using Application.Interfaces.IRepositories;
 using Domain.Entities;
 using Infrastructure.Data;
@@ -25,7 +25,7 @@ public class LogsRepository : ILogsRepository
 
     public async Task<List<Log>> GetLogsAsync(int page, int limit, SortByEnum sortBy, SortDirEnum sortDir,
             MethodsEnum[]? methods, int[]? statusCodes, double? responseLessThan, double? responseMoreThan,
-            DateTime? createdFrom, DateTime? createdTo)
+            DateTime? createdFrom, DateTime? createdTo, string? search)
     {
         var query = _db.Logs.AsQueryable();
 
@@ -48,6 +48,10 @@ public class LogsRepository : ILogsRepository
             query = query.Where(l => l.CreatedAt >= createdFrom);
         if (createdTo != null)
             query = query.Where(l => l.CreatedAt <= createdTo);
+
+        // Search function
+        if (!string.IsNullOrEmpty(search))
+            query = SearchFunction(query, search);
 
         // Sort by and sort direction
         (string by, bool desc) = (sortBy.ToString().ToLower(), sortDir.ToString().ToLower() == "desc");
@@ -74,5 +78,41 @@ public class LogsRepository : ILogsRepository
     {
         int saved = await _db.SaveChangesAsync();
         return saved > 0;
+    }
+
+
+    private IQueryable<Log> SearchFunction(IQueryable<Log> query, string search)
+    {
+        var qLower = search.Trim().ToLowerInvariant();
+
+        // method?
+        var methods = new[] { "get", "post", "put", "patch", "delete", "head", "options" };
+        bool looksLikeMethod = methods.Contains(qLower);
+
+        // status ranges or exact?
+        bool isRange5xx = qLower is "5xx" or "4xx" or "3xx" or "2xx" or "1xx";
+        bool isInt = int.TryParse(qLower, out var qCode);
+
+        if (looksLikeMethod)
+            query = query.Where(r => r.Method.ToLower() == qLower);
+        else if (isRange5xx)
+        {
+            int prefix = qLower[0] - '0';
+            int start = prefix * 100;
+            int end = start + 99;
+            query = query.Where(r => r.StatusCode >= start && r.StatusCode <= end);
+        }
+        else if (isInt && qCode is >= 100 and <= 599)
+            query = query.Where(r => r.StatusCode == qCode);
+        else
+        {
+            var terms = qLower.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            foreach (var term in terms)
+            {
+                query = query.Where(r => EF.Functions.ILike(r.Path, $"%{term}%"));
+            }
+        }
+
+        return query;
     }
 }
