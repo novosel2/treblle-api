@@ -27,7 +27,7 @@ public class ProxyService : IProxyService
         _logsService = logsService;
     }
 
-    public async Task<HttpResponseMessage> ForwardAsync(HttpRequest incomingRequest, string targetPath, string? body)
+    public async Task<HttpResponseMessage> ForwardAsync(HttpRequest incomingRequest, string targetPath, string? body, CancellationToken ct)
     {
         string method = incomingRequest.Method;
 
@@ -59,15 +59,15 @@ public class ProxyService : IProxyService
             var httpResponse = await _apiClient.SendRequestAsync(req);
             sw.Stop();
 
-            var log = await _logsService.AddLogAsync(req, httpResponse, sw);
+            var log = await _logsService.AddLogAsync(req, httpResponse, sw, ct);
 
             return httpResponse;
         }
-        catch (TimeoutException ex)
+        catch
         {
-            await _logsService.AddLogAsync(req, new HttpResponseMessage() { StatusCode = 0 }, sw);
+            await _logsService.AddLogAsync(req, new HttpResponseMessage() { StatusCode = 0 }, sw, ct);
 
-            throw ex;
+            throw;
         }
     }
 

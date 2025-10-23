@@ -139,3 +139,4 @@
 /home/novosel2/development/aspnetcore/treblle-api/Api/bin/Debug/net9.0/zh-Hant/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 /home/novosel2/development/aspnetcore/treblle-api/Api/bin/Debug/net9.0/Domain.dll
 /home/novosel2/development/aspnetcore/treblle-api/Api/bin/Debug/net9.0/Domain.pdb
+/home/novosel2/development/aspnetcore/treblle-api/Api/bin/Debug/net9.0/System.Text.Json.dll

@@ -16,16 +16,16 @@ public class LogsRepository : ILogsRepository
     }
 
 
-    public async Task<Log> AddLogAsync(Log log)
+    public async Task<Log> AddLogAsync(Log log, CancellationToken ct)
     {
         var entry = await _db.AddAsync(log);
         return entry.Entity;
     }
 
 
-    public async Task<List<Log>> GetLogsAsync(int page, int limit, SortByEnum sortBy, SortDirEnum sortDir,
-            MethodsEnum[]? methods, int[]? statusCodes, double? responseLessThan, double? responseMoreThan,
-            DateTime? createdFrom, DateTime? createdTo, string? search)
+    public async Task<(List<Log>, int Total)> GetLogsAsync(int page, int limit, SortByEnum sortBy, SortDirEnum sortDir,
+            MethodsEnum[]? methods, int[]? statusCodes, double? responseLte, double? responseGte,
+            DateTimeOffset? createdFrom, DateTimeOffset? createdTo, string? search, CancellationToken ct)
     {
         var query = _db.Logs.AsQueryable();
 
@@ -38,10 +38,10 @@ public class LogsRepository : ILogsRepository
             query = query.Where(l => statusCodes.Contains(l.StatusCode));
 
         // Filter by response time
-        if (responseLessThan != null)
-            query = query.Where(l => l.ResponseTime <= responseLessThan);
-        if (responseMoreThan != null)
-            query = query.Where(l => l.ResponseTime >= responseMoreThan);
+        if (responseLte != null)
+            query = query.Where(l => l.ResponseTime <= responseLte);
+        if (responseGte != null)
+            query = query.Where(l => l.ResponseTime >= responseGte);
 
         // Filter by date
         if (createdFrom != null)
@@ -51,7 +51,7 @@ public class LogsRepository : ILogsRepository
 
         // Search function
         if (!string.IsNullOrEmpty(search))
-            query = SearchFunction(query, search);
+            query = SearchFunction(query, search, ct);
 
         // Sort by and sort direction
         (string by, bool desc) = (sortBy.ToString().ToLower(), sortDir.ToString().ToLower() == "desc");
@@ -65,18 +65,20 @@ public class LogsRepository : ILogsRepository
             _ => query.OrderByDescending(r => r.CreatedAt) // default
         };
 
+        int total = await query.CountAsync();
+
         var logs = await query
             .Skip(page * limit)
             .Take(limit)
             .ToListAsync();
 
-        return logs;
+        return (logs, total);
     }
 
 
-    public async Task<List<Problem>> GetProblemsAsync(int page, int limit, SortByEnum sortBy, SortDirEnum sortDir,
-            MethodsEnum[]? methods, int[]? statusCodes, double? responseLessThan, double? responseMoreThan,
-            DateTime? createdFrom, DateTime? createdTo)
+    public async Task<(List<Problem>, int Total)> GetProblemsAsync(int page, int limit, SortByEnum sortBy, SortDirEnum sortDir,
+            MethodsEnum[]? methods, int[]? statusCodes, double? responseLte, double? responseGte,
+            DateTimeOffset? createdFrom, DateTimeOffset? createdTo, CancellationToken ct)
     {
         var query = _db.Problems.AsQueryable();
 
@@ -89,10 +91,10 @@ public class LogsRepository : ILogsRepository
             query = query.Where(p => statusCodes.Contains(p.StatusCode));
 
         // Filter by response time
-        if (responseLessThan != null)
-            query = query.Where(p => p.LastResponseTime <= responseLessThan);
-        if (responseMoreThan != null)
-            query = query.Where(p => p.LastResponseTime >= responseMoreThan);
+        if (responseLte != null)
+            query = query.Where(p => p.LastResponseTime <= responseLte);
+        if (responseGte != null)
+            query = query.Where(p => p.LastResponseTime >= responseGte);
 
         // Filter by date
         if (createdFrom != null)
@@ -112,16 +114,18 @@ public class LogsRepository : ILogsRepository
             _ => query.OrderByDescending(r => r.CreatedAt) // default
         };
 
-        var logs = await query
+        int total = await query.CountAsync();
+
+        var problems = await query
             .Skip(page * limit)
             .Take(limit)
             .ToListAsync();
 
-        return logs;
+        return (problems, total);
     }
 
 
-    public async Task<Problem?> GetExistingProblemAsync(ProblemType type, string path, string method)
+    public async Task<Problem?> GetExistingProblemAsync(ProblemType type, string path, string method, CancellationToken ct)
     {
         var now = DateTime.UtcNow;
         Problem? problem = await _db.Problems.FirstOrDefaultAsync(
@@ -134,13 +138,13 @@ public class LogsRepository : ILogsRepository
     }
 
 
-    public async Task AddProblemAsync(Problem problem)
+    public async Task AddProblemAsync(Problem problem, CancellationToken ct)
     {
         await _db.Problems.AddAsync(problem);
     }
 
 
-    public void UpdateProblem(Problem problem, Log log)
+    public void UpdateProblem(Problem problem, Log log, CancellationToken ct)
     {
         problem.Occurrences++;
         problem.StatusCode = log.StatusCode;
@@ -150,14 +154,14 @@ public class LogsRepository : ILogsRepository
     }
 
 
-    public async Task<bool> IsSavedAsync()
+    public async Task<bool> IsSavedAsync(CancellationToken ct)
     {
         int saved = await _db.SaveChangesAsync();
         return saved > 0;
     }
 
 
-    private IQueryable<Log> SearchFunction(IQueryable<Log> query, string search)
+    private IQueryable<Log> SearchFunction(IQueryable<Log> query, string search, CancellationToken ct)
     {
         var qLower = search.Trim().ToLowerInvariant();
 

@@ -4,6 +4,8 @@ using Application.Interfaces.IServices;
 using Domain.Entities;
 using System.Diagnostics;
 using Application.Exceptions;
+using Application.Common;
+using Application.Common.Dto;
 
 namespace Application.Services;
 
@@ -17,88 +19,93 @@ public class LogsService : ILogsService
     }
 
 
-    public async Task<List<Log>> GetLogsAsync(int page, int limit, SortByEnum sortBy, SortDirEnum sortDir,
-            MethodsEnum[]? methods, int[]? statusCodes, double? responseLessThan, double? responseMoreThan,
-            DateTime? createdFrom, DateTime? createdTo, string? search)
+    public async Task<PagedResult<LogDto>> GetLogsAsync(int page, int limit, SortByEnum sortBy, SortDirEnum sortDir,
+            MethodsEnum[]? methods, int[]? statusCodes, double? responseLte, double? responseGte,
+            DateTimeOffset? createdFrom, DateTimeOffset? createdTo, string? search, CancellationToken ct)
     {
-        var logs = await _logsRepository.GetLogsAsync(page, limit, sortBy, sortDir, methods,
-                statusCodes, responseLessThan, responseMoreThan, createdFrom, createdTo, search);
-        return logs;
+        var (logs, total) = await _logsRepository.GetLogsAsync(page, limit, sortBy, sortDir, methods,
+                statusCodes, responseLte, responseGte, createdFrom, createdTo, search, ct);
+
+        var logDtos = logs.Select(l => l.ToLogDto()).ToList();
+
+        return new PagedResult<LogDto>(logDtos, page, limit, total);
     }
 
 
-    public async Task<List<Problem>> GetProblemsAsync(int page, int limit, SortByEnum sortBy, SortDirEnum sortDir,
-            MethodsEnum[]? methods, int[]? statusCodes, double? responseLessThan, double? responseMoreThan,
-            DateTime? createdFrom, DateTime? createdTo)
+    public async Task<PagedResult<ProblemDto>> GetProblemsAsync(int page, int limit, SortByEnum sortBy, SortDirEnum sortDir,
+            MethodsEnum[]? methods, int[]? statusCodes, double? responseLte, double? responseGte,
+            DateTimeOffset? createdFrom, DateTimeOffset? createdTo, CancellationToken ct)
     {
-        var problems = await _logsRepository.GetProblemsAsync(page, limit, sortBy, sortDir, methods,
-                statusCodes, responseLessThan, responseMoreThan, createdFrom, createdTo);
-        return problems;
+        var (problems, total) = await _logsRepository.GetProblemsAsync(page, limit, sortBy, sortDir, methods,
+                statusCodes, responseLte, responseGte, createdFrom, createdTo, ct);
+
+        var problemDtos = problems.Select(p => p.ToProblemDto()).ToList();
+
+        return new PagedResult<ProblemDto>(problemDtos, page, limit, total);
     }
 
 
-    public async Task<Log> AddLogAsync(HttpRequestMessage req, HttpResponseMessage res, Stopwatch sw)
+    public async Task<LogDto> AddLogAsync(HttpRequestMessage req, HttpResponseMessage res, Stopwatch sw, CancellationToken ct)
     {
         var log = new Log()
         {
             Method = req.Method.Method,
-            Path = req.RequestUri?.ToString() ?? "undefined path",
+            Path = req.RequestUri is null ? "undefined path" : req.RequestUri.PathAndQuery,
             ResponseTime = sw.ElapsedMilliseconds,
             StatusCode = (int)res.StatusCode
         };
 
-        log = await _logsRepository.AddLogAsync(log);
+        log = await _logsRepository.AddLogAsync(log, ct);
 
-        await CheckForProblemsAsync(log);
 
-        if (!await _logsRepository.IsSavedAsync())
+        await CheckForProblemsAsync(log, ct);
+
+        if (!await _logsRepository.IsSavedAsync(ct))
             throw new SavingChangesFailedException("Failed while adding the log to database");
 
-        return log;
+        return log.ToLogDto();
     }
 
 
-    private async Task CheckForProblemsAsync(Log log)
+    private async Task CheckForProblemsAsync(Log log, CancellationToken ct)
     {
-        if (log.ResponseTime >= 500)
-            await CreateProblemAsync(ProblemType.HighResponseTime, log);
+        if (log.ResponseTime >= 300)
+            await CreateProblemAsync(ProblemType.HighResponseTime, log, ct);
 
-        if (log.StatusCode.ToString()[0] == '5')
-            await CreateProblemAsync(ProblemType.ServerError, log);
+        if (log.StatusCode >= 500 && log.StatusCode <= 600)
+            await CreateProblemAsync(ProblemType.ServerError, log, ct);
 
         if (log.StatusCode == 0)
-            await CreateProblemAsync(ProblemType.Timeout, log);
+            await CreateProblemAsync(ProblemType.Timeout, log, ct);
 
         if (log.StatusCode == 429)
-            await CreateProblemAsync(ProblemType.RateLimitExceeded, log);
+            await CreateProblemAsync(ProblemType.RateLimitExceeded, log, ct);
 
         if (log.StatusCode == 503)
-            await CreateProblemAsync(ProblemType.ServiceUnavailable, log);
+            await CreateProblemAsync(ProblemType.ServiceUnavailable, log, ct);
     }
 
-    private async Task CreateProblemAsync(ProblemType type, Log log)
+    private async Task CreateProblemAsync(ProblemType type, Log log, CancellationToken ct)
     {
-        Problem? problem = await _logsRepository.GetExistingProblemAsync(ProblemType.HighResponseTime, log.Path, log.Method);
+        Problem? problem = await _logsRepository.GetExistingProblemAsync(type, log.Path, log.Method, ct);
 
         if (problem == null)
         {
-            Console.WriteLine("CREATING");
             problem = new Problem()
             {
                 Method = log.Method,
                 Type = type,
                 Path = log.Path,
-                LastSeen = DateTime.UtcNow,
+                LastSeen = DateTimeOffset.UtcNow,
                 LastResponseTime = log.ResponseTime,
                 StatusCode = log.StatusCode
             };
 
-            await _logsRepository.AddProblemAsync(problem);
-            Console.WriteLine("CREATED");
+            await _logsRepository.AddProblemAsync(problem, ct);
         }
         else
         {
-            _logsRepository.UpdateProblem(problem, log);
+            _logsRepository.UpdateProblem(problem, log, ct);
         }
     }
 }

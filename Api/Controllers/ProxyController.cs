@@ -19,7 +19,8 @@ public class ProxyController : ControllerBase
     // {ANY METHOD}: {anyPath}?{anyQuery}
 
     [HttpGet("{**path}"), HttpPost("{**path}"), HttpDelete("{**path}"), HttpPut("{**path}"), HttpPatch("{**path}")]
-    public async Task<IActionResult> Forward(string path, [FromBody] JsonElement? raw)
+    [ProducesResponseType(typeof(ContentResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Forward(string path, [FromBody] JsonElement? raw, CancellationToken ct = default)
     {
         string? body = raw.HasValue &&
               raw.Value.ValueKind != JsonValueKind.Null &&
@@ -27,7 +28,7 @@ public class ProxyController : ControllerBase
         ? raw.Value.GetRawText()
         : null;
 
-        var response = await _proxyService.ForwardAsync(Request, path, body);
+        var response = await _proxyService.ForwardAsync(Request, path, body, ct);
 
         var content = await response.Content.ReadAsStringAsync();
         var contentType = response.Content.Headers.ContentType?.ToString() ?? "application/json";

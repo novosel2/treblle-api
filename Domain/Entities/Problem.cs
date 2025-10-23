@@ -27,8 +27,8 @@ public class Problem
     public int StatusCode { get; set; }
 
     [Required]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
     [Required]
-    public DateTime LastSeen { get; set; }
+    public DateTimeOffset LastSeen { get; set; }
 }

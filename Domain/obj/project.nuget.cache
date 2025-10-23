@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "1LWv6WjGVGY=",
+  "dgSpecHash": "ejowOR5mLOE=",
   "success": true,
   "projectFilePath": "/home/novosel2/development/aspnetcore/treblle-api/Domain/Domain.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/home/novosel2/.nuget/packages/microsoft.aspnetcore.app.ref/9.0.9/microsoft.aspnetcore.app.ref.9.0.9.nupkg.sha512"
+  ],
   "logs": []
 }

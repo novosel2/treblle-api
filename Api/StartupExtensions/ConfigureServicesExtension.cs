@@ -56,6 +56,7 @@ public static class ConfigureServicesExtension
         });
 
         services.AddHttpClient();
+        services.AddHttpContextAccessor();
 
         services.AddDbContext<AppDbContext>(options
                 => options.UseNpgsql(config.GetConnectionString("AppConnection")));
