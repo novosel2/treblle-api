@@ -38,6 +38,7 @@ The actual API endpoints aren't exposed directly, unfortunately :(. At the end I
 4. **Access the API**
 
    The proxy runs on `http://localhost:8000`
+   Swagger is available at `http://localhost:8000/swagger`
 
 ## Available Endpoints
 
