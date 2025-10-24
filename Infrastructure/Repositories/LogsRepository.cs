@@ -3,6 +3,7 @@ using Application.Interfaces.IRepositories;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Application.Common.Dto;
 
 namespace Infrastructure.Repositories;
 
@@ -23,38 +24,36 @@ public class LogsRepository : ILogsRepository
     }
 
 
-    public async Task<(List<Log>, int Total)> GetLogsAsync(int page, int limit, SortByEnum sortBy, SortDirEnum sortDir,
-            MethodsEnum[]? methods, int[]? statusCodes, double? responseLte, double? responseGte,
-            DateTimeOffset? createdFrom, DateTimeOffset? createdTo, string? search, CancellationToken ct)
+    public async Task<(List<Log>, int Total)> GetLogsAsync(QueryDto q, CancellationToken ct)
     {
         var query = _db.Logs.AsNoTracking();
 
         // Filter by methods
-        if (methods != null)
-            query = query.Where(l => methods.Select(m => m.ToString()).Contains(l.Method));
+        if (q.Methods != null)
+            query = query.Where(l => q.Methods.Select(m => m.ToString()).Contains(l.Method));
 
         // Filter by status codes
-        if (statusCodes != null)
-            query = query.Where(l => statusCodes.Contains(l.StatusCode));
+        if (q.StatusCodes != null)
+            query = query.Where(l => q.StatusCodes.Contains(l.StatusCode));
 
         // Filter by response time
-        if (responseLte != null)
-            query = query.Where(l => l.ResponseTime <= responseLte);
-        if (responseGte != null)
-            query = query.Where(l => l.ResponseTime >= responseGte);
+        if (q.ResponseLte != null)
+            query = query.Where(l => l.ResponseTime <= q.ResponseLte);
+        if (q.ResponseGte != null)
+            query = query.Where(l => l.ResponseTime >= q.ResponseGte);
 
         // Filter by date
-        if (createdFrom != null)
-            query = query.Where(l => l.CreatedAt >= createdFrom);
-        if (createdTo != null)
-            query = query.Where(l => l.CreatedAt <= createdTo);
+        if (q.CreatedFrom != null)
+            query = query.Where(l => l.CreatedAt >= q.CreatedFrom);
+        if (q.CreatedTo != null)
+            query = query.Where(l => l.CreatedAt <= q.CreatedTo);
 
         // Search function
-        if (!string.IsNullOrEmpty(search))
-            query = SearchFunction(query, search, ct);
+        if (!string.IsNullOrEmpty(q.Search))
+            query = SearchFunction(query, q.Search, ct);
 
         // Sort by and sort direction
-        (string by, bool desc) = (sortBy.ToString().ToLower(), sortDir.ToString().ToLower() == "desc");
+        (string by, bool desc) = (q.SortBy.ToString().ToLower(), q.SortDir.ToString().ToLower() == "desc");
         query = (by, desc) switch
         {
             ("responsetime", false) => query.OrderBy(r => r.ResponseTime),
@@ -68,42 +67,40 @@ public class LogsRepository : ILogsRepository
         int total = await query.CountAsync();
 
         var logs = await query
-            .Skip(page * limit)
-            .Take(limit)
+            .Skip(q.Page * q.Limit)
+            .Take(q.Limit)
             .ToListAsync();
 
         return (logs, total);
     }
 
 
-    public async Task<(List<Problem>, int Total)> GetProblemsAsync(int page, int limit, SortByEnum sortBy, SortDirEnum sortDir,
-            MethodsEnum[]? methods, int[]? statusCodes, double? responseLte, double? responseGte,
-            DateTimeOffset? createdFrom, DateTimeOffset? createdTo, CancellationToken ct)
+    public async Task<(List<Problem>, int Total)> GetProblemsAsync(QueryDto q, CancellationToken ct)
     {
         var query = _db.Problems.AsNoTracking();
 
         // Filter by methods
-        if (methods != null)
-            query = query.Where(p => methods.Select(m => m.ToString()).Contains(p.Method));
+        if (q.Methods != null)
+            query = query.Where(p => q.Methods.Select(m => m.ToString()).Contains(p.Method));
 
         // Filter by status codes
-        if (statusCodes != null)
-            query = query.Where(p => statusCodes.Contains(p.StatusCode));
+        if (q.StatusCodes != null)
+            query = query.Where(p => q.StatusCodes.Contains(p.StatusCode));
 
         // Filter by response time
-        if (responseLte != null)
-            query = query.Where(p => p.LastResponseTime <= responseLte);
-        if (responseGte != null)
-            query = query.Where(p => p.LastResponseTime >= responseGte);
+        if (q.ResponseLte != null)
+            query = query.Where(p => p.LastResponseTime <= q.ResponseLte);
+        if (q.ResponseGte != null)
+            query = query.Where(p => p.LastResponseTime >= q.ResponseGte);
 
         // Filter by date
-        if (createdFrom != null)
-            query = query.Where(p => p.CreatedAt >= createdFrom);
-        if (createdTo != null)
-            query = query.Where(p => p.CreatedAt <= createdTo);
+        if (q.CreatedFrom != null)
+            query = query.Where(p => p.CreatedAt >= q.CreatedFrom);
+        if (q.CreatedTo != null)
+            query = query.Where(p => p.CreatedAt <= q.CreatedTo);
 
         // Sort by and sort direction
-        (string by, bool desc) = (sortBy.ToString().ToLower(), sortDir.ToString().ToLower() == "desc");
+        (string by, bool desc) = (q.SortBy.ToString().ToLower(), q.SortDir.ToString().ToLower() == "desc");
         query = (by, desc) switch
         {
             ("responsetime", false) => query.OrderBy(r => r.LastResponseTime),
@@ -117,8 +114,8 @@ public class LogsRepository : ILogsRepository
         int total = await query.CountAsync();
 
         var problems = await query
-            .Skip(page * limit)
-            .Take(limit)
+            .Skip(q.Page * q.Limit)
+            .Take(q.Limit)
             .ToListAsync();
 
         return (problems, total);

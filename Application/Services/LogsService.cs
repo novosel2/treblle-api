@@ -20,29 +20,23 @@ public class LogsService : ILogsService
     }
 
 
-    public async Task<PagedResult<LogDto>> GetLogsAsync(int page, int limit, SortByEnum sortBy, SortDirEnum sortDir,
-            MethodsEnum[]? methods, int[]? statusCodes, double? responseLte, double? responseGte,
-            DateTimeOffset? createdFrom, DateTimeOffset? createdTo, string? search, CancellationToken ct)
+    public async Task<PagedResult<LogDto>> GetLogsAsync(QueryDto q, CancellationToken ct)
     {
-        var (logs, total) = await _logsRepository.GetLogsAsync(page, limit, sortBy, sortDir, methods,
-                statusCodes, responseLte, responseGte, createdFrom, createdTo, search, ct);
+        var (logs, total) = await _logsRepository.GetLogsAsync(q, ct);
 
         var logDtos = logs.Select(l => l.ToLogDto()).ToList();
 
-        return new PagedResult<LogDto>(logDtos, page, limit, total);
+        return new PagedResult<LogDto>(logDtos, q.Page, q.Limit, total);
     }
 
 
-    public async Task<PagedResult<ProblemDto>> GetProblemsAsync(int page, int limit, SortByEnum sortBy, SortDirEnum sortDir,
-            MethodsEnum[]? methods, int[]? statusCodes, double? responseLte, double? responseGte,
-            DateTimeOffset? createdFrom, DateTimeOffset? createdTo, CancellationToken ct)
+    public async Task<PagedResult<ProblemDto>> GetProblemsAsync(QueryDto q, CancellationToken ct)
     {
-        var (problems, total) = await _logsRepository.GetProblemsAsync(page, limit, sortBy, sortDir, methods,
-                statusCodes, responseLte, responseGte, createdFrom, createdTo, ct);
+        var (problems, total) = await _logsRepository.GetProblemsAsync(q, ct);
 
         var problemDtos = problems.Select(p => p.ToProblemDto()).ToList();
 
-        return new PagedResult<ProblemDto>(problemDtos, page, limit, total);
+        return new PagedResult<ProblemDto>(problemDtos, q.Page, q.Limit, total);
     }
 
 

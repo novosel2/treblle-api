@@ -139,6 +139,9 @@
 /home/novosel2/development/aspnetcore/treblle-api/Api/bin/Debug/net9.0/zh-Hant/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 /home/novosel2/development/aspnetcore/treblle-api/Api/bin/Debug/net9.0/Domain.dll
 /home/novosel2/development/aspnetcore/treblle-api/Api/bin/Debug/net9.0/Domain.pdb
-/home/novosel2/development/aspnetcore/treblle-api/Api/bin/Debug/net9.0/System.Text.Json.dll
-/home/novosel2/development/aspnetcore/treblle-api/Api/bin/Debug/net9.0/Api.xml
-/home/novosel2/development/aspnetcore/treblle-api/Api/obj/Debug/net9.0/Api.xml
+/home/novosel2/development/aspnetcore/treblle-api/Api/bin/Debug/net9.0/Microsoft.AspNetCore.JsonPatch.dll
+/home/novosel2/development/aspnetcore/treblle-api/Api/bin/Debug/net9.0/Microsoft.AspNetCore.Mvc.Razor.Extensions.dll
+/home/novosel2/development/aspnetcore/treblle-api/Api/bin/Debug/net9.0/Microsoft.AspNetCore.Razor.Language.dll
+/home/novosel2/development/aspnetcore/treblle-api/Api/bin/Debug/net9.0/Microsoft.CodeAnalysis.Razor.dll
+/home/novosel2/development/aspnetcore/treblle-api/Api/bin/Debug/net9.0/Newtonsoft.Json.dll
+/home/novosel2/development/aspnetcore/treblle-api/Api/bin/Debug/net9.0/Newtonsoft.Json.Bson.dll
