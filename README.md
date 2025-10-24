@@ -23,7 +23,7 @@ The actual API endpoints aren't exposed directly, unfortunately :(. At the end I
 
 2. **Add your credentials**
 
-   Open `.env` and fill in your database password and any other required values:
+   Open `.env` and fill in your database password and any other required values: (use any password if you don't have postgres)
 
    ```
    POSTGRES_PASSWORD=your_password_here
