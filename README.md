@@ -32,7 +32,7 @@ The actual API endpoints aren't exposed directly, unfortunately :(. At the end I
 3. **Fire it up**
 
    ```bash
-   docker-compose up --build
+   docker compose up --build
    ```
 
 4. **Access the API**
