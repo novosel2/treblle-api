@@ -1,0 +1,9 @@
+bin
+obj
+**/*.User
+**/*.userosscache
+**/*.suo
+**/*.swp
+**/.vs
+**/appsettings.Development.json
+**/appsettings.Local*.json

@@ -55,10 +55,11 @@ public class ProxyService : IProxyService
             // Timeout
             response = new HttpResponseMessage(HttpStatusCode.GatewayTimeout);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // Connection error or something unexpected
             response = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+            Console.WriteLine(ex.Message);
         }
         finally
         {
